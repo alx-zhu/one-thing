@@ -33,10 +33,16 @@ export const useTasks = () => {
   });
 
   const generateId = () =>
-    `task-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const addTask = useCallback(
-    (bucketId: BucketType, title: string, description?: string) => {
+    (
+      bucketId: BucketType,
+      title: string,
+      description?: string,
+      deadline?: Date,
+      timeEstimate?: number
+    ) => {
       const bucket = appState.buckets.find((b) => b.id === bucketId);
       if (bucket?.maxTasks && bucket.tasks.length >= bucket.maxTasks) {
         throw new Error(
@@ -48,6 +54,8 @@ export const useTasks = () => {
         id: generateId(),
         title,
         description,
+        deadline,
+        timeEstimate,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -67,7 +75,12 @@ export const useTasks = () => {
   );
 
   const editTask = useCallback(
-    (taskId: string, updates: Partial<Pick<Task, "title" | "description">>) => {
+    (
+      taskId: string,
+      updates: Partial<
+        Pick<Task, "title" | "description" | "deadline" | "timeEstimate">
+      >
+    ) => {
       setAppState((prev) => ({
         ...prev,
         buckets: prev.buckets.map((bucket) => ({

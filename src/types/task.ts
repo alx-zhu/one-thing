@@ -3,6 +3,8 @@ export interface Task {
   id: string;
   title: string;
   description?: string;
+  deadline?: Date;
+  timeEstimate?: number; // in minutes
   createdAt: Date;
   updatedAt: Date;
 }

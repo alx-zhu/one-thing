@@ -13,6 +13,10 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Plus, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,11 +27,15 @@ interface TaskBucketProps {
   onAddTask: (
     bucketId: BucketType,
     title: string,
-    description?: string
+    description?: string,
+    deadline?: Date,
+    timeEstimate?: number
   ) => void;
   onEditTask: (
     taskId: string,
-    updates: Partial<Pick<Task, "title" | "description">>
+    updates: Partial<
+      Pick<Task, "title" | "description" | "deadline" | "timeEstimate">
+    >
   ) => void;
   onDeleteTask: (taskId: string) => void;
   onSetOneThing: (taskId: string | null) => void;
@@ -53,6 +61,8 @@ export const TaskBucket = ({
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskDeadline, setNewTaskDeadline] = useState("");
+  const [newTaskTimeEstimate, setNewTaskTimeEstimate] = useState("");
   const [isDropTarget, setIsDropTarget] = useState(false);
 
   const canAddTask = !bucket.maxTasks || bucket.tasks.length < bucket.maxTasks;
@@ -65,10 +75,14 @@ export const TaskBucket = ({
       onAddTask(
         bucket.id,
         newTaskTitle.trim(),
-        newTaskDescription.trim() || undefined
+        newTaskDescription.trim() || undefined,
+        newTaskDeadline ? new Date(newTaskDeadline) : undefined,
+        newTaskTimeEstimate ? parseInt(newTaskTimeEstimate) : undefined
       );
       setNewTaskTitle("");
       setNewTaskDescription("");
+      setNewTaskDeadline("");
+      setNewTaskTimeEstimate("");
       setIsAddingTask(false);
     } catch (error) {
       console.error("Failed to add task:", error);
@@ -82,6 +96,8 @@ export const TaskBucket = ({
     } else if (e.key === "Escape") {
       setNewTaskTitle("");
       setNewTaskDescription("");
+      setNewTaskDeadline("");
+      setNewTaskTimeEstimate("");
       setIsAddingTask(false);
     }
   };
@@ -170,53 +186,85 @@ export const TaskBucket = ({
         ))}
 
         {isAddingTask ? (
-          <Card className="border-dashed bg-muted/30 px-4 py-3">
-            <div className="space-y-2">
-              <input
-                type="text"
+          <Card className="border-dashed bg-muted/30 px-4 py-4">
+            <div className="space-y-4">
+              <Input
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter task title..."
-                className="w-full px-0 py-1 text-sm font-medium bg-transparent border-none focus:outline-none placeholder:text-muted-foreground"
+                className="h-9 font-medium border-none bg-transparent p-0 shadow-none focus-visible:ring-0"
                 autoFocus
               />
-              <textarea
+              <Textarea
                 value={newTaskDescription}
                 onChange={(e) => setNewTaskDescription(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Add description (optional)..."
-                className="w-full px-0 py-1 text-xs text-muted-foreground bg-transparent border-none resize-none focus:outline-none placeholder:text-muted-foreground"
+                className="min-h-[60px] text-sm border-none bg-transparent p-0 shadow-none focus-visible:ring-0 resize-none"
                 rows={2}
               />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">
+                    Deadline
+                  </Label>
+                  <Input
+                    type="date"
+                    value={newTaskDeadline}
+                    onChange={(e) => setNewTaskDeadline(e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">
+                    Time (minutes)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={newTaskTimeEstimate}
+                    onChange={(e) => setNewTaskTimeEstimate(e.target.value)}
+                    placeholder="30"
+                    min="5"
+                    step="5"
+                    className="h-8"
+                  />
+                </div>
+              </div>
               <div className="flex gap-2 pt-1">
-                <button
+                <Button
+                  size="sm"
                   onClick={handleAddTask}
-                  className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+                  className="h-8 px-3 text-xs"
                 >
-                  Add
-                </button>
-                <button
+                  Add Task
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={() => {
                     setNewTaskTitle("");
                     setNewTaskDescription("");
+                    setNewTaskDeadline("");
+                    setNewTaskTimeEstimate("");
                     setIsAddingTask(false);
                   }}
-                  className="px-3 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="h-8 px-3 text-xs"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           </Card>
         ) : canAddTask ? (
-          <button
+          <Button
+            variant="outline"
             onClick={() => setIsAddingTask(true)}
-            className="w-full p-3 border-2 border-dashed border-muted-foreground/25 rounded-lg text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground transition-all duration-200 flex items-center justify-center gap-2 text-sm"
+            className="w-full h-12 border-2 border-dashed border-muted-foreground/25 bg-transparent hover:border-muted-foreground/50 hover:bg-muted/50 transition-all duration-200 text-muted-foreground hover:text-foreground"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 mr-2" />
             Add task
-          </button>
+          </Button>
         ) : (
           <div className="text-center py-4 text-xs text-muted-foreground">
             Bucket limit reached
