@@ -260,7 +260,7 @@ export const TaskBucket = ({
           <Button
             variant="outline"
             onClick={() => setIsAddingTask(true)}
-            className="w-full h-12 border-2 border-dashed border-muted-foreground/25 bg-transparent hover:border-muted-foreground/50 hover:bg-muted/50 transition-all duration-200 text-muted-foreground hover:text-foreground"
+            className="w-full h-12 border-2 border-dashed border-muted-foreground/25 bg-transparent hover:border-muted-foreground/50 hover:bg-muted/50 transition-all duration-200 text-muted-foreground hover:text-foreground cursor-pointer"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add task

@@ -193,9 +193,6 @@ export const TaskItem = ({
                 <h3 className="text-sm font-medium leading-none">
                   {task.title}
                 </h3>
-                {isOneThing && (
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                )}
               </div>
               {task.description && (
                 <p className="text-xs text-muted-foreground leading-relaxed">
