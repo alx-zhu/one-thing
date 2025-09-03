@@ -33,6 +33,16 @@ function App() {
     moveTask(taskId, from as BucketType, to as BucketType);
   };
 
+  const handleDropOneThing = (e: React.DragEvent) => {
+    e.preventDefault();
+
+    if (draggedTask) {
+      setOneThing(draggedTask.id);
+    }
+
+    handleDragEnd();
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -52,6 +62,10 @@ function App() {
         <OneThingDisplay
           oneThingTask={oneThingTask}
           className="max-w-2xl mx-auto"
+          draggedTask={draggedTask}
+          onDragOver={handleDragOver}
+          onDrop={handleDropOneThing}
+          onSetOneThing={setOneThing}
         />
 
         {/* Task Buckets */}
