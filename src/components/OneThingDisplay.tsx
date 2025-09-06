@@ -10,6 +10,7 @@ import {
   getDeadlineStatus,
   getDeadlineColor,
 } from "@/lib/dateUtils";
+import { Button } from "./ui/button";
 
 interface OneThingDisplayProps {
   oneThingTask: Task | null;
@@ -76,19 +77,22 @@ export const OneThingDisplay = ({
         {oneThingTask ? (
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <Star className="h-4 w-4 fill-amber-500 text-amber-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-2 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold text-lg text-foreground leading-tight">
                     {oneThingTask.title}
                   </h3>
-                  <button
+                  <Button
+                    size="icon"
+                    variant="ghost"
                     onClick={() => onSetOneThing(null)}
-                    className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
+                    className={cn(
+                      "h-6 w-6 text-amber-600 hover:text-amber-700"
+                    )}
                     title="Clear ONE Thing"
                   >
                     <Star className="h-4 w-4 fill-current" />
-                  </button>
+                  </Button>
                 </div>
                 {oneThingTask.description && (
                   <p className="text-muted-foreground text-sm leading-relaxed">

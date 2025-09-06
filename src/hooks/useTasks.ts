@@ -4,9 +4,10 @@ import type { Task, TaskBucket, BucketType, AppState } from "@/types/task";
 
 const initialBuckets: TaskBucket[] = [
   {
-    id: "when-available",
-    title: "When Available",
-    description: "Tasks to do when you have extra time",
+    id: "time-sensitive",
+    title: "Time Sensitive",
+    description: "Urgent tasks that must be done today",
+    maxTasks: 3,
     tasks: [],
   },
   {
@@ -17,10 +18,9 @@ const initialBuckets: TaskBucket[] = [
     tasks: [],
   },
   {
-    id: "time-sensitive",
-    title: "Time Sensitive",
-    description: "Urgent tasks that must be done today",
-    maxTasks: 3,
+    id: "when-available",
+    title: "When Available",
+    description: "Tasks to do when you have extra time",
     tasks: [],
   },
 ];

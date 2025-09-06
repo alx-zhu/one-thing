@@ -1,18 +1,12 @@
 // src/components/TaskBucket.tsx
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   TaskBucket as TaskBucketType,
   Task,
   BucketType,
 } from "@/types/task";
 import { TaskItem } from "./TaskItem";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -119,58 +113,127 @@ export const TaskBucket = ({
     setIsDropTarget(false);
   };
 
-  const getBucketColor = (bucketId: BucketType) => {
-    switch (bucketId) {
-      case "time-sensitive":
-        return "border-red-200 dark:border-red-800";
-      case "important":
-        return "border-blue-200 dark:border-blue-800";
-      case "when-available":
-        return "border-gray-200 dark:border-gray-700";
-      default:
-        return "border-gray-200 dark:border-gray-700";
-    }
-  };
+  const sortedTasks = useMemo(() => {
+    return bucket.tasks.sort((a, b) => {
+      if (a.deadline && b.deadline) {
+        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      }
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
+      return 0;
+    });
+  }, [bucket.tasks]);
 
   return (
-    <Card
+    <div
       className={cn(
-        "flex flex-col h-full min-h-96 transition-all duration-200",
-        getBucketColor(bucket.id),
-        isDropTarget && "ring-2 ring-primary/50 bg-primary/5 scale-[1.02]"
+        "space-y-3 transition-all duration-200",
+        isDropTarget && "scale-[1.01]"
       )}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-base">{bucket.title}</CardTitle>
-            <CardDescription className="text-xs">
-              {bucket.description}
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {bucket.maxTasks && (
-              <span
-                className={cn(
-                  "px-2 py-1 rounded-full text-xs font-medium",
-                  isAtLimit
-                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-                    : "bg-muted"
-                )}
-              >
-                {bucket.tasks.length}/{bucket.maxTasks}
-              </span>
-            )}
-            {isAtLimit && <AlertCircle className="h-3 w-3 text-red-500" />}
-          </div>
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+            {bucket.title}
+          </h3>
+          {bucket.maxTasks && (
+            <span
+              className={cn(
+                "text-xs px-2 py-1 rounded-full font-medium",
+                isAtLimit
+                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                  : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+              )}
+            >
+              {bucket.tasks.length}/{bucket.maxTasks}
+            </span>
+          )}
+          {isAtLimit && <AlertCircle className="h-3 w-3 text-red-500" />}
         </div>
-      </CardHeader>
+        {canAddTask && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-xs opacity-60 hover:opacity-100"
+            onClick={() => setIsAddingTask(true)}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add
+          </Button>
+        )}
+      </div>
 
-      <CardContent className="flex-1 space-y-3">
-        {bucket.tasks.map((task) => (
+      {/* Tasks Section */}
+      <div className="space-y-2">
+        {/* Add Task Form */}
+        {isAddingTask && (
+          <Card className="p-4 space-y-3 border-dashed">
+            <Input
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter task title..."
+              autoFocus
+            />
+            <Textarea
+              value={newTaskDescription}
+              onChange={(e) => setNewTaskDescription(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Description (optional)..."
+              rows={2}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">
+                  Deadline
+                </Label>
+                <Input
+                  type="date"
+                  value={newTaskDeadline}
+                  onChange={(e) => setNewTaskDeadline(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">
+                  Time (minutes)
+                </Label>
+                <Input
+                  type="number"
+                  value={newTaskTimeEstimate}
+                  onChange={(e) => setNewTaskTimeEstimate(e.target.value)}
+                  placeholder="30"
+                  min="5"
+                  step="5"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleAddTask}>
+                Add Task
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setNewTaskTitle("");
+                  setNewTaskDescription("");
+                  setNewTaskDeadline("");
+                  setNewTaskTimeEstimate("");
+                  setIsAddingTask(false);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Task Items */}
+        {sortedTasks.map((task) => (
           <TaskItem
             key={task.id}
             task={task}
@@ -185,92 +248,20 @@ export const TaskBucket = ({
           />
         ))}
 
-        {isAddingTask ? (
-          <Card className="border-dashed bg-muted/30 px-4 py-4">
-            <div className="space-y-4">
-              <Input
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Enter task title..."
-                className="h-9 font-medium border-none bg-transparent p-0 shadow-none focus-visible:ring-0"
-                autoFocus
-              />
-              <Textarea
-                value={newTaskDescription}
-                onChange={(e) => setNewTaskDescription(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Add description (optional)..."
-                className="min-h-[60px] text-sm border-none bg-transparent p-0 shadow-none focus-visible:ring-0 resize-none"
-                rows={2}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">
-                    Deadline
-                  </Label>
-                  <Input
-                    type="date"
-                    value={newTaskDeadline}
-                    onChange={(e) => setNewTaskDeadline(e.target.value)}
-                    className="h-8"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">
-                    Time (minutes)
-                  </Label>
-                  <Input
-                    type="number"
-                    value={newTaskTimeEstimate}
-                    onChange={(e) => setNewTaskTimeEstimate(e.target.value)}
-                    placeholder="30"
-                    min="5"
-                    step="5"
-                    className="h-8"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2 pt-1">
-                <Button
-                  size="sm"
-                  onClick={handleAddTask}
-                  className="h-8 px-3 text-xs"
-                >
-                  Add Task
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setNewTaskTitle("");
-                    setNewTaskDescription("");
-                    setNewTaskDeadline("");
-                    setNewTaskTimeEstimate("");
-                    setIsAddingTask(false);
-                  }}
-                  className="h-8 px-3 text-xs"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ) : canAddTask ? (
-          <Button
-            variant="outline"
-            onClick={() => setIsAddingTask(true)}
-            className="w-full h-12 border-2 border-dashed border-muted-foreground/25 bg-transparent hover:border-muted-foreground/50 hover:bg-muted/50 transition-all duration-200 text-muted-foreground hover:text-foreground cursor-pointer"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add task
-          </Button>
-        ) : (
+        {/* Empty State */}
+        {bucket.tasks.length === 0 && !isAddingTask && (
+          <div className="text-center py-6 text-gray-400 dark:text-gray-600 text-xs border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+            No {bucket.title.toLowerCase()} tasks.
+          </div>
+        )}
+
+        {/* Limit Reached State */}
+        {isAtLimit && !isAddingTask && (
           <div className="text-center py-4 text-xs text-muted-foreground">
             Bucket limit reached
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

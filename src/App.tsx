@@ -45,7 +45,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-2xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -69,7 +69,8 @@ function App() {
         />
 
         {/* Task Buckets */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6"> */}
+        <div className="space-y-8">
           {buckets.map((bucket) => (
             <TaskBucket
               key={bucket.id}
@@ -93,7 +94,8 @@ function App() {
         {/* Footer */}
         <footer className="text-center pt-8 border-t">
           <p className="text-xs text-muted-foreground">
-            Inspired by "The ONE Thing" by Gary Keller and Jay Papasan
+            What's the ONE thing I can do such that by doing it everything else
+            will be easier or unnecessary?"
           </p>
         </footer>
       </div>

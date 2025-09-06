@@ -199,25 +199,27 @@ export const TaskItem = ({
                   {task.description}
                 </p>
               )}
-              <div className="flex items-center gap-2 flex-wrap">
-                {task.deadline && (
-                  <div
-                    className={cn(
-                      "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border",
-                      deadlineColor
-                    )}
-                  >
-                    <Calendar className="h-3 w-3" />
-                    {formatDate(task.deadline)}
-                  </div>
-                )}
-                {task.timeEstimate && (
-                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                    <Clock className="h-3 w-3" />
-                    {formatTimeEstimate(task.timeEstimate)}
-                  </div>
-                )}
-              </div>
+              {(task.deadline || task.timeEstimate) && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {task.deadline && (
+                    <div
+                      className={cn(
+                        "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border",
+                        deadlineColor
+                      )}
+                    >
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(task.deadline)}
+                    </div>
+                  )}
+                  {task.timeEstimate && (
+                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      <Clock className="h-3 w-3" />
+                      {formatTimeEstimate(task.timeEstimate)}
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
