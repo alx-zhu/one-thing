@@ -4,7 +4,8 @@ export interface Task {
   title: string;
   description?: string;
   deadline?: Date;
-  timeEstimate?: number; // in minutes
+  timeEstimate?: number;
+  bucketId?: BucketType;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,10 +17,10 @@ export interface TaskBucket {
   title: string;
   description: string;
   maxTasks?: number;
-  tasks: Task[];
 }
 
 export interface AppState {
+  tasks: Task[];
   buckets: TaskBucket[];
   oneThingTaskId: string | null;
   selectedDate: Date;

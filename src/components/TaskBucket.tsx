@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 interface TaskBucketProps {
   bucket: TaskBucketType;
+  tasks: Task[];
   oneThingTaskId: string | null;
   draggedTask: Task | null;
   onAddTask: (
@@ -41,6 +42,7 @@ interface TaskBucketProps {
 
 export const TaskBucket = ({
   bucket,
+  tasks,
   oneThingTaskId,
   draggedTask,
   onAddTask,
@@ -59,11 +61,15 @@ export const TaskBucket = ({
   const [newTaskTimeEstimate, setNewTaskTimeEstimate] = useState("");
   const [isDropTarget, setIsDropTarget] = useState(false);
 
-  const canAddTask = !bucket.maxTasks || bucket.tasks.length < bucket.maxTasks;
-  const isAtLimit = bucket.maxTasks && bucket.tasks.length >= bucket.maxTasks;
+  const canAddTask = !bucket.maxTasks || tasks.length < bucket.maxTasks;
 
   const handleAddTask = () => {
     if (!newTaskTitle.trim()) return;
+
+    if (!canAddTask) {
+      alert(`Cannot add more than ${bucket.maxTasks} tasks to ${bucket.title}`);
+      return;
+    }
 
     try {
       onAddTask(
@@ -109,20 +115,25 @@ export const TaskBucket = ({
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    if (!canAddTask) {
+      alert(`Cannot add more than ${bucket.maxTasks} tasks to ${bucket.title}`);
+      return;
+    }
     onDrop(e, bucket.id);
     setIsDropTarget(false);
   };
 
+  // Prioritize deadlines, then creation date by oldest first.
   const sortedTasks = useMemo(() => {
-    return bucket.tasks.sort((a, b) => {
+    return tasks.sort((a, b) => {
       if (a.deadline && b.deadline) {
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
       }
       if (a.deadline) return -1;
       if (b.deadline) return 1;
-      return 0;
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
-  }, [bucket.tasks]);
+  }, [tasks]);
 
   return (
     <div
@@ -144,15 +155,22 @@ export const TaskBucket = ({
             <span
               className={cn(
                 "text-xs px-2 py-1 rounded-full font-medium",
-                isAtLimit
+                !canAddTask
                   ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
                   : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
               )}
             >
-              {bucket.tasks.length}/{bucket.maxTasks}
+              {tasks.length}/{bucket.maxTasks}
             </span>
           )}
-          {isAtLimit && <AlertCircle className="h-3 w-3 text-red-500" />}
+          {!canAddTask && (
+            <>
+              <AlertCircle className="h-3 w-3 text-red-500" />
+              <span className="text-center text-xs text-muted-foreground bg-transparent">
+                Bucket limit reached
+              </span>
+            </>
+          )}
         </div>
         {canAddTask && (
           <Button
@@ -205,7 +223,7 @@ export const TaskBucket = ({
                   type="number"
                   value={newTaskTimeEstimate}
                   onChange={(e) => setNewTaskTimeEstimate(e.target.value)}
-                  placeholder="30"
+                  placeholder="(e.g., 30)"
                   min="5"
                   step="5"
                 />
@@ -249,16 +267,9 @@ export const TaskBucket = ({
         ))}
 
         {/* Empty State */}
-        {bucket.tasks.length === 0 && !isAddingTask && (
+        {tasks.length === 0 && !isAddingTask && (
           <div className="text-center py-6 text-gray-400 dark:text-gray-600 text-xs border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
             No {bucket.title.toLowerCase()} tasks.
-          </div>
-        )}
-
-        {/* Limit Reached State */}
-        {isAtLimit && !isAddingTask && (
-          <div className="text-center py-4 text-xs text-muted-foreground">
-            Bucket limit reached
           </div>
         )}
       </div>

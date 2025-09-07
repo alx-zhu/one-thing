@@ -1,36 +1,30 @@
 // src/hooks/useTasks.ts
 import { useState, useCallback } from "react";
 import type { Task, TaskBucket, BucketType, AppState } from "@/types/task";
-
-const initialBuckets: TaskBucket[] = [
-  {
-    id: "time-sensitive",
-    title: "Time Sensitive",
-    description: "Urgent tasks that must be done today",
-    maxTasks: 3,
-    tasks: [],
-  },
-  {
-    id: "important",
-    title: "Important",
-    description: "High-impact tasks that move you forward",
-    maxTasks: 5,
-    tasks: [],
-  },
-  {
-    id: "when-available",
-    title: "When Available",
-    description: "Tasks to do when you have extra time",
-    tasks: [],
-  },
-];
+import { initialBuckets, initialTasks } from "@/lib/constants";
 
 export const useTasks = () => {
   const [appState, setAppState] = useState<AppState>({
     buckets: initialBuckets,
     oneThingTaskId: null,
     selectedDate: new Date(),
+    tasks: initialTasks,
   });
+
+  const fetchTasks = useCallback((): Task[] => {
+    return appState.tasks;
+  }, [appState.tasks]);
+
+  const fetchBuckets = useCallback((): TaskBucket[] => {
+    return appState.buckets;
+  }, [appState.buckets]);
+
+  const fetchBucketTasks = useCallback(
+    (bucketId: BucketType): Task[] => {
+      return appState.tasks.filter((task) => task.bucketId === bucketId);
+    },
+    [appState.tasks]
+  );
 
   const generateId = () =>
     `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -44,10 +38,8 @@ export const useTasks = () => {
       timeEstimate?: number
     ) => {
       const bucket = appState.buckets.find((b) => b.id === bucketId);
-      if (bucket?.maxTasks && bucket.tasks.length >= bucket.maxTasks) {
-        throw new Error(
-          `Cannot add more than ${bucket.maxTasks} tasks to ${bucket.title}`
-        );
+      if (!bucket) {
+        throw new Error("Invalid bucket");
       }
 
       const newTask: Task = {
@@ -56,17 +48,14 @@ export const useTasks = () => {
         description,
         deadline,
         timeEstimate,
+        bucketId,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       setAppState((prev) => ({
         ...prev,
-        buckets: prev.buckets.map((bucket) =>
-          bucket.id === bucketId
-            ? { ...bucket, tasks: [...bucket.tasks, newTask] }
-            : bucket
-        ),
+        tasks: [...prev.tasks, newTask],
       }));
 
       return newTask;
@@ -83,14 +72,11 @@ export const useTasks = () => {
     ) => {
       setAppState((prev) => ({
         ...prev,
-        buckets: prev.buckets.map((bucket) => ({
-          ...bucket,
-          tasks: bucket.tasks.map((task) =>
-            task.id === taskId
-              ? { ...task, ...updates, updatedAt: new Date() }
-              : task
-          ),
-        })),
+        tasks: prev.tasks.map((task) =>
+          task.id === taskId
+            ? { ...task, ...updates, updatedAt: new Date() }
+            : task
+        ),
       }));
     },
     []
@@ -99,10 +85,7 @@ export const useTasks = () => {
   const deleteTask = useCallback((taskId: string) => {
     setAppState((prev) => ({
       ...prev,
-      buckets: prev.buckets.map((bucket) => ({
-        ...bucket,
-        tasks: bucket.tasks.filter((task) => task.id !== taskId),
-      })),
+      tasks: prev.tasks.filter((task) => task.id !== taskId),
       oneThingTaskId:
         prev.oneThingTaskId === taskId ? null : prev.oneThingTaskId,
     }));
@@ -113,36 +96,21 @@ export const useTasks = () => {
       if (fromBucket === toBucket) return;
 
       const targetBucket = appState.buckets.find((b) => b.id === toBucket);
-      if (
-        targetBucket?.maxTasks &&
-        targetBucket.tasks.length >= targetBucket.maxTasks
-      ) {
-        throw new Error(
-          `Cannot add more than ${targetBucket.maxTasks} tasks to ${targetBucket.title}`
-        );
-      }
+      if (!targetBucket) return;
 
+      // Error handling will be delegated to the actual buckets
       setAppState((prev) => {
-        const taskToMove = prev.buckets
-          .find((b) => b.id === fromBucket)
-          ?.tasks.find((t) => t.id === taskId);
+        const taskToMove = prev.tasks.find((t) => t.id === taskId);
 
         if (!taskToMove) return prev;
 
         return {
           ...prev,
-          buckets: prev.buckets.map((bucket) => {
-            if (bucket.id === fromBucket) {
-              return {
-                ...bucket,
-                tasks: bucket.tasks.filter((t) => t.id !== taskId),
-              };
-            }
-            if (bucket.id === toBucket) {
-              return { ...bucket, tasks: [...bucket.tasks, taskToMove] };
-            }
-            return bucket;
-          }),
+          tasks: prev.tasks.map((task) =>
+            task.id === taskId
+              ? { ...task, updatedAt: new Date(), bucketId: toBucket }
+              : task
+          ),
         };
       });
     },
@@ -158,35 +126,32 @@ export const useTasks = () => {
 
   const getTaskById = useCallback(
     (taskId: string): Task | null => {
-      for (const bucket of appState.buckets) {
-        const task = bucket.tasks.find((t) => t.id === taskId);
-        if (task) return task;
-      }
-      return null;
+      return appState.tasks.find((t) => t.id === taskId) || null;
     },
-    [appState.buckets]
+    [appState.tasks]
   );
 
-  const getBucketByTaskId = useCallback(
-    (taskId: string): BucketType | null => {
-      for (const bucket of appState.buckets) {
-        if (bucket.tasks.find((t) => t.id === taskId)) return bucket.id;
-      }
-      return null;
+  const getTaskBucketId = useCallback(
+    (taskId: string): BucketType | undefined => {
+      const task = appState.tasks.find((t) => t.id === taskId);
+      return task ? task.bucketId : undefined;
     },
-    [appState.buckets]
+    [appState.tasks]
   );
 
   return {
     buckets: appState.buckets,
     oneThingTaskId: appState.oneThingTaskId,
     selectedDate: appState.selectedDate,
+    fetchTasks,
+    fetchBuckets,
+    fetchBucketTasks,
     addTask,
     editTask,
     deleteTask,
     moveTask,
     setOneThing,
     getTaskById,
-    getBucketByTaskId,
+    getTaskBucketId,
   };
 };

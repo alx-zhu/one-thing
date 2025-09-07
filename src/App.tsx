@@ -11,6 +11,7 @@ function App() {
   const {
     buckets,
     oneThingTaskId,
+    fetchBucketTasks,
     addTask,
     editTask,
     deleteTask,
@@ -75,6 +76,7 @@ function App() {
             <TaskBucket
               key={bucket.id}
               bucket={bucket}
+              tasks={fetchBucketTasks(bucket.id)}
               oneThingTaskId={oneThingTaskId}
               draggedTask={draggedTask}
               onAddTask={addTask}
