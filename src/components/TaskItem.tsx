@@ -1,6 +1,6 @@
 // src/components/TaskItem.tsx
 import { useState } from "react";
-import type { Task, BucketType } from "@/types/task";
+import type { Task, BucketType, EditTaskType } from "@/types/task";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,12 +27,7 @@ interface TaskItemProps {
   bucketId: BucketType;
   isOneThing: boolean;
   isDragging?: boolean;
-  onEdit: (
-    taskId: string,
-    updates: Partial<
-      Pick<Task, "title" | "description" | "deadline" | "timeEstimate">
-    >
-  ) => void;
+  onEdit: (taskId: string, updates: EditTaskType) => void;
   onDelete: (taskId: string) => void;
   onSetOneThing: (taskId: string | null) => void;
   onDragStart: (e: React.DragEvent, task: Task, bucketId: BucketType) => void;
@@ -67,13 +62,12 @@ export const TaskItem = ({
   };
 
   const handleSave = () => {
-    const updates: Partial<
-      Pick<Task, "title" | "description" | "deadline" | "timeEstimate">
-    > = {
+    const updates: EditTaskType = {
       title: editTitle.trim(),
       description: editDescription.trim() || undefined,
       deadline: editDeadline ? new Date(editDeadline) : undefined,
       timeEstimate: editTimeEstimate ? parseInt(editTimeEstimate) : undefined,
+      steps: task.steps,
     };
 
     onEdit(task.id, updates);

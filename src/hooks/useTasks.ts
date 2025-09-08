@@ -1,14 +1,21 @@
 // src/hooks/useTasks.ts
 import { useState, useCallback } from "react";
-import type { Task, TaskBucket, BucketType, AppState } from "@/types/task";
-import { initialBuckets, initialTasks } from "@/lib/constants";
+import type {
+  Task,
+  TaskBucket,
+  BucketType,
+  AppState,
+  AddTaskType,
+  EditTaskType,
+} from "@/types/task";
+import { sampleBuckets, sampleTasks } from "@/lib/constants";
 
 export const useTasks = () => {
   const [appState, setAppState] = useState<AppState>({
-    buckets: initialBuckets,
+    buckets: sampleBuckets,
     oneThingTaskId: null,
     selectedDate: new Date(),
-    tasks: initialTasks,
+    tasks: sampleTasks,
   });
 
   const fetchTasks = useCallback((): Task[] => {
@@ -30,13 +37,14 @@ export const useTasks = () => {
     `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const addTask = useCallback(
-    (
-      bucketId: BucketType,
-      title: string,
-      description?: string,
-      deadline?: Date,
-      timeEstimate?: number
-    ) => {
+    ({
+      bucketId,
+      title,
+      steps,
+      description,
+      deadline,
+      timeEstimate,
+    }: AddTaskType) => {
       const bucket = appState.buckets.find((b) => b.id === bucketId);
       if (!bucket) {
         throw new Error("Invalid bucket");
@@ -51,6 +59,8 @@ export const useTasks = () => {
         bucketId,
         createdAt: new Date(),
         updatedAt: new Date(),
+        steps,
+        isCompleted: false,
       };
 
       setAppState((prev) => ({
@@ -63,24 +73,16 @@ export const useTasks = () => {
     [appState.buckets]
   );
 
-  const editTask = useCallback(
-    (
-      taskId: string,
-      updates: Partial<
-        Pick<Task, "title" | "description" | "deadline" | "timeEstimate">
-      >
-    ) => {
-      setAppState((prev) => ({
-        ...prev,
-        tasks: prev.tasks.map((task) =>
-          task.id === taskId
-            ? { ...task, ...updates, updatedAt: new Date() }
-            : task
-        ),
-      }));
-    },
-    []
-  );
+  const editTask = useCallback((taskId: string, updates: EditTaskType) => {
+    setAppState((prev) => ({
+      ...prev,
+      tasks: prev.tasks.map((task) =>
+        task.id === taskId
+          ? { ...task, ...updates, updatedAt: new Date() }
+          : task
+      ),
+    }));
+  }, []);
 
   const deleteTask = useCallback((taskId: string) => {
     setAppState((prev) => ({

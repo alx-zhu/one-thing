@@ -1,6 +1,6 @@
 import type { Task, TaskBucket } from "@/types/task";
 
-export const initialTasks: Task[] = [
+export const sampleTasks: Task[] = [
   // Time Sensitive (3 tasks)
   {
     id: "task-1",
@@ -11,6 +11,33 @@ export const initialTasks: Task[] = [
     bucketId: "time-sensitive",
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
+    isCompleted: false,
+    steps: [
+      {
+        id: 1,
+        taskId: "task-1",
+        description: "Gather W2 forms",
+        isCompleted: true,
+        createdAt: new Date("2025-01-01"),
+        updatedAt: new Date("2025-01-01"),
+      },
+      {
+        id: 2,
+        taskId: "task-1",
+        description: "Collect receipts",
+        isCompleted: false,
+        createdAt: new Date("2025-01-01"),
+        updatedAt: new Date("2025-01-01"),
+      },
+      {
+        id: 3,
+        taskId: "task-1",
+        description: "Fill out tax forms",
+        isCompleted: false,
+        createdAt: new Date("2025-01-01"),
+        updatedAt: new Date("2025-01-01"),
+      },
+    ],
   },
   {
     id: "task-2",
@@ -21,6 +48,7 @@ export const initialTasks: Task[] = [
     bucketId: "time-sensitive",
     createdAt: new Date("2025-01-02"),
     updatedAt: new Date("2025-01-02"),
+    steps: [],
   },
   {
     id: "task-3",
@@ -31,6 +59,7 @@ export const initialTasks: Task[] = [
     bucketId: "time-sensitive",
     createdAt: new Date("2025-01-03"),
     updatedAt: new Date("2025-01-03"),
+    steps: [],
   },
 
   // Important (3 tasks)
@@ -43,6 +72,32 @@ export const initialTasks: Task[] = [
     bucketId: "important",
     createdAt: new Date("2025-01-04"),
     updatedAt: new Date("2025-01-04"),
+    steps: [
+      {
+        id: 4,
+        taskId: "task-4",
+        description: "Compile key metrics",
+        isCompleted: true,
+        createdAt: new Date("2025-01-04"),
+        updatedAt: new Date("2025-01-04"),
+      },
+      {
+        id: 5,
+        taskId: "task-4",
+        description: "Draft strategy updates",
+        isCompleted: false,
+        createdAt: new Date("2025-01-04"),
+        updatedAt: new Date("2025-01-04"),
+      },
+      {
+        id: 6,
+        taskId: "task-4",
+        description: "Create presentation slides",
+        isCompleted: false,
+        createdAt: new Date("2025-01-04"),
+        updatedAt: new Date("2025-01-04"),
+      },
+    ],
   },
   {
     id: "task-5",
@@ -53,6 +108,7 @@ export const initialTasks: Task[] = [
     bucketId: "important",
     createdAt: new Date("2025-01-05"),
     updatedAt: new Date("2025-01-05"),
+    steps: [],
   },
   {
     id: "task-6",
@@ -63,6 +119,7 @@ export const initialTasks: Task[] = [
     bucketId: "important",
     createdAt: new Date("2025-01-06"),
     updatedAt: new Date("2025-01-06"),
+    steps: [],
   },
 
   // When Available (2 tasks)
@@ -74,6 +131,7 @@ export const initialTasks: Task[] = [
     bucketId: "when-available",
     createdAt: new Date("2025-01-07"),
     updatedAt: new Date("2025-01-07"),
+    steps: [],
   },
   {
     id: "task-8",
@@ -83,28 +141,31 @@ export const initialTasks: Task[] = [
     bucketId: "when-available",
     createdAt: new Date("2025-01-08"),
     updatedAt: new Date("2025-01-08"),
+    steps: [],
   },
-
-  // Undefined bucket_id (2 tasks)
   {
     id: "task-9",
     title: "Plan weekend hiking trip",
     description: "Research trails and book campsite for next month",
     timeEstimate: 60,
+    bucketId: "when-available",
     createdAt: new Date("2025-01-09"),
     updatedAt: new Date("2025-01-09"),
+    steps: [],
   },
   {
     id: "task-10",
     title: "Learn basic Spanish phrases",
     description: "Practice conversational Spanish for upcoming vacation",
     timeEstimate: 45,
+    bucketId: "when-available",
     createdAt: new Date("2025-01-10"),
     updatedAt: new Date("2025-01-10"),
+    steps: [],
   },
 ];
 
-export const initialBuckets: TaskBucket[] = [
+export const sampleBuckets: TaskBucket[] = [
   {
     id: "time-sensitive",
     title: "Time Sensitive",

@@ -1,11 +1,33 @@
 // src/types/task.ts
+export type taskId = string;
+
+export type EditTaskType = Partial<
+  Omit<Task, "id" | "createdAt" | "updatedAt">
+>;
+
+export type AddTaskType = Omit<
+  Task,
+  "id" | "createdAt" | "updatedAt" | "isCompleted"
+>;
+
 export interface Task {
-  id: string;
+  id: taskId;
   title: string;
+  steps: TaskStep[];
+  bucketId: BucketType;
+  createdAt: Date;
+  updatedAt: Date;
   description?: string;
   deadline?: Date;
   timeEstimate?: number;
-  bucketId?: BucketType;
+  isCompleted?: boolean;
+}
+
+export interface TaskStep {
+  id: number;
+  taskId: taskId;
+  description: string;
+  isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

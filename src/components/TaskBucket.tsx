@@ -4,6 +4,8 @@ import type {
   TaskBucket as TaskBucketType,
   Task,
   BucketType,
+  EditTaskType,
+  AddTaskType,
 } from "@/types/task";
 import { TaskItem } from "./TaskItem";
 import { Card } from "@/components/ui/card";
@@ -19,19 +21,8 @@ interface TaskBucketProps {
   tasks: Task[];
   oneThingTaskId: string | null;
   draggedTask: Task | null;
-  onAddTask: (
-    bucketId: BucketType,
-    title: string,
-    description?: string,
-    deadline?: Date,
-    timeEstimate?: number
-  ) => void;
-  onEditTask: (
-    taskId: string,
-    updates: Partial<
-      Pick<Task, "title" | "description" | "deadline" | "timeEstimate">
-    >
-  ) => void;
+  onAddTask: (task: AddTaskType) => void;
+  onEditTask: (taskId: string, updates: EditTaskType) => void;
   onDeleteTask: (taskId: string) => void;
   onSetOneThing: (taskId: string | null) => void;
   onDragStart: (e: React.DragEvent, task: Task, bucketId: BucketType) => void;
@@ -67,18 +58,20 @@ export const TaskBucket = ({
     if (!newTaskTitle.trim()) return;
 
     if (!canAddTask) {
-      alert(`Cannot add more than ${bucket.maxTasks} tasks to ${bucket.title}`);
       return;
     }
 
     try {
-      onAddTask(
-        bucket.id,
-        newTaskTitle.trim(),
-        newTaskDescription.trim() || undefined,
-        newTaskDeadline ? new Date(newTaskDeadline) : undefined,
-        newTaskTimeEstimate ? parseInt(newTaskTimeEstimate) : undefined
-      );
+      onAddTask({
+        bucketId: bucket.id,
+        title: newTaskTitle.trim(),
+        description: newTaskDescription.trim() || undefined,
+        deadline: newTaskDeadline ? new Date(newTaskDeadline) : undefined,
+        timeEstimate: newTaskTimeEstimate
+          ? parseInt(newTaskTimeEstimate)
+          : undefined,
+        steps: [],
+      });
       setNewTaskTitle("");
       setNewTaskDescription("");
       setNewTaskDeadline("");
@@ -116,7 +109,6 @@ export const TaskBucket = ({
 
   const handleDrop = (e: React.DragEvent) => {
     if (!canAddTask) {
-      alert(`Cannot add more than ${bucket.maxTasks} tasks to ${bucket.title}`);
       return;
     }
     onDrop(e, bucket.id);
